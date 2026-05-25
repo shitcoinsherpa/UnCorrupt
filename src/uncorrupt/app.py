@@ -164,7 +164,8 @@ def _propagate_merged_values(
                 if r == r_top and c == c_left:
                     continue
                 if pd.isna(df.iloc[r][col]):
-                    df.iloc[r, df.columns.get_loc(col)] = top_value
+                    col_loc = df.columns.get_loc(col)
+                    df.iloc[r, col_loc] = top_value  # type: ignore[index]
 
 
 def _calamine_rows_to_dataframe(rows: list[list]) -> pd.DataFrame:
@@ -241,6 +242,11 @@ def _read_cell_formats_xlsx(
                     continue
                 pandas_row = row_i - 1
                 for col_i, c in enumerate(row):
+                    # MergedCell instances expose .value but not .is_date /
+                    # .number_format. Skip them; only the top-left of a
+                    # merged range is the real Cell carrying the format.
+                    if not isinstance(c, openpyxl.cell.cell.Cell):
+                        continue
                     if c.is_date and c.value is not None and c.number_format:
                         col_name = header[col_i] if col_i < len(header) else f"Unnamed: {col_i}"
                         sheet_map[(col_name, pandas_row)] = c.number_format

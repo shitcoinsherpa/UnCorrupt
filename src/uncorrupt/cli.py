@@ -93,7 +93,8 @@ def _cmd_detect(args) -> int:
         print(f"Suspicions: {len(report.suspicions)}")
 
         # Bucket by confidence band
-        bucket = {label: [] for _, label, _ in BANDS}
+        from .detector import Suspicion
+        bucket: dict[str, list[Suspicion]] = {label: [] for _, label, _ in BANDS}
         for s in report.suspicions:
             for threshold, label, _ in BANDS:
                 if s.confidence >= threshold:
@@ -225,12 +226,12 @@ def _cmd_audit(args) -> int:
         print()
     else:
         print(f"\nFiles with corruption flags: {n_corrupted_files}/{len(files)}")
-        for f, s in summary.items():
+        for fpath, s in summary.items():
             if "error" in s:
-                print(f"  [error] {Path(f).name}: {s['error']}")
+                print(f"  [error] {Path(fpath).name}: {s['error']}")
             elif s.get("n_high_confidence") or s.get("n_mid_confidence"):
                 kinds = ", ".join(KIND_LABELS.get(k, k) for k in s["kinds"])
-                print(f"  {Path(f).name}: "
+                print(f"  {Path(fpath).name}: "
                       f"{s['n_high_confidence']} high + "
                       f"{s['n_mid_confidence']} mid "
                       f"({kinds})")

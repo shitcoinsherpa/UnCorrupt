@@ -101,9 +101,11 @@ class XrefIndex:
         return None
 
 
-def _parse_pipe_separated(s: str) -> list[str]:
-    """HGNC stores some xrefs as pipe-separated (e.g. multiple RefSeq IDs)."""
-    if pd.isna(s):
+def _parse_pipe_separated(s: object) -> list[str]:
+    """HGNC stores some xrefs as pipe-separated (e.g. multiple RefSeq IDs).
+    Accepts `object` because pandas itertuples returns NaN floats for
+    empty cells; callers don't always narrow to str first."""
+    if s is None or (isinstance(s, float) and pd.isna(s)):
         return []
     return [t.strip() for t in str(s).split("|") if t.strip()]
 
@@ -124,10 +126,10 @@ def load_xref_index(path: Path | None = None) -> XrefIndex:
     by_hgnc_id: dict[str, str] = {}
 
     for row in df.itertuples(index=False):
-        sym = row.symbol
-        if pd.isna(sym):
+        sym_raw: object = row.symbol
+        if sym_raw is None or (isinstance(sym_raw, float) and pd.isna(sym_raw)):
             continue
-        sym = str(sym)
+        sym = str(sym_raw)
 
         ent = getattr(row, "entrez_id", None)
         if pd.notna(ent):

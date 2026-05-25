@@ -185,9 +185,10 @@ def load_ziemann_2021_corpus(path: Path | None = None) -> list[CorpusEntry]:
     df = pd.read_excel(path, dtype=object)
     entries: list[CorpusEntry] = []
     for row in df.itertuples(index=False):
-        year = None
+        year: int | None = None
         with contextlib.suppress(ValueError, TypeError):
-            year = int(row.Year) if pd.notna(row.Year) else None
+            if pd.notna(row.Year):
+                year = int(str(row.Year))
         entries.append(CorpusEntry(
             pmc_id=str(row.PMCID),
             journal=str(row.Journal_Name) if pd.notna(row.Journal_Name) else "",
@@ -223,10 +224,11 @@ def load_ziemann_2016_corpus(path: Path | None = None) -> list[Ziemann2016Entry]
 
     journal_df = pd.read_excel(path, sheet_name="JournalArticles", dtype=object)
     for r in journal_df.itertuples(index=False):
-        year = None
+        year: int | None = None
         with contextlib.suppress(ValueError, TypeError):
-            year = int(getattr(r, "Year_Published", None)) if pd.notna(
-                getattr(r, "Year_Published", None)) else None
+            raw_year = getattr(r, "Year_Published", None)
+            if raw_year is not None and pd.notna(raw_year):
+                year = int(str(raw_year))
         url = getattr(r, "_0", "") or getattr(r, "Supplementary_file_URL", "")
         entries.append(Ziemann2016Entry(
             source="journal",
@@ -245,8 +247,9 @@ def load_ziemann_2016_corpus(path: Path | None = None) -> list[Ziemann2016Entry]
     for r in geo_df.itertuples(index=False):
         year = None
         with contextlib.suppress(ValueError, TypeError):
-            year = int(getattr(r, "Year_of_Release", None)) if pd.notna(
-                getattr(r, "Year_of_Release", None)) else None
+            raw_year = getattr(r, "Year_of_Release", None)
+            if raw_year is not None and pd.notna(raw_year):
+                year = int(str(raw_year))
         url = getattr(r, "_0", "") or getattr(r, "Supplementary_file_URL", "")
         entries.append(Ziemann2016Entry(
             source="geo",

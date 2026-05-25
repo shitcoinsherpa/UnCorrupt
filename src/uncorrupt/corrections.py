@@ -240,7 +240,7 @@ def _confidence_bucket(conf: float) -> str:
     return "low (<0.5)"
 
 
-def compute_analytics(corrections: list[Correction]) -> dict:
+def compute_analytics(corrections: list[Correction]) -> dict[str, object]:
     """Broad-view batch analytics for the proposals.
 
     Returns:
@@ -269,10 +269,14 @@ def compute_analytics(corrections: list[Correction]) -> dict:
         }
 
     n = len(corrections)
-    kinds = Counter(c.kind for c in corrections)
-    families = Counter(_family_of(c.proposed_value) for c in corrections)
-    conf_buckets = Counter(_confidence_bucket(c.confidence) for c in corrections)
-    sheet_cols = Counter(
+    kinds: Counter[str] = Counter(c.kind for c in corrections)
+    families: Counter[str] = Counter(
+        _family_of(c.proposed_value) for c in corrections
+    )
+    conf_buckets: Counter[str] = Counter(
+        _confidence_bucket(c.confidence) for c in corrections
+    )
+    sheet_cols: Counter[str] = Counter(
         f"{c.sheet or '_'}::{c.column}" for c in corrections
     )
 
@@ -297,24 +301,29 @@ def compute_analytics(corrections: list[Correction]) -> dict:
         (f", OTHER = {families['OTHER']}" if families.get("OTHER") else "")
     )
 
+    # Pull out the sort keys explicitly so mypy can narrow on (str, int)
+    # tuples instead of the heavy union pandas-stubs imputes to Counter
+    # values when they're embedded inside a DataFrame() call.
+    by_kind = sorted(
+        list(kinds.items()), key=lambda kv: kv[1], reverse=True,
+    )
+    by_family = sorted(
+        list(families.items()), key=lambda kv: kv[1], reverse=True,
+    )
+    by_sheet_col = sorted(
+        list(sheet_cols.items()), key=lambda kv: kv[1], reverse=True,
+    )[:15]
     return {
         "summary_md": summary_md,
-        "by_kind_df": pd.DataFrame(
-            sorted(kinds.items(), key=lambda x: -x[1]),
-            columns=["kind", "count"],
-        ),
-        "by_family_df": pd.DataFrame(
-            sorted(families.items(), key=lambda x: -x[1]),
-            columns=["family", "count"],
-        ),
+        "by_kind_df": pd.DataFrame(by_kind, columns=["kind", "count"]),
+        "by_family_df": pd.DataFrame(by_family, columns=["family", "count"]),
         "by_confidence_df": pd.DataFrame(
             [(b, conf_buckets.get(b, 0)) for b in
              ("high (>=0.85)", "medium (0.5-0.85)", "low (<0.5)")],
             columns=["confidence", "count"],
         ),
         "by_sheet_col_df": pd.DataFrame(
-            sorted(sheet_cols.items(), key=lambda x: -x[1])[:15],  # top 15
-            columns=["sheet_column", "count"],
+            by_sheet_col, columns=["sheet_column", "count"],
         ),
         "totals": {
             "n_corrections": n,

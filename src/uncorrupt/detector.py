@@ -1620,12 +1620,16 @@ def detect(df: pd.DataFrame, sheet: str | None = None) -> Report:
             # suppress entirely for quantitative-measurement columns.
             if str(col) in quantitative_measurement_columns:
                 continue
-            n: int | None = None
+            # Use a different local name so this doesn't collide with the
+            # `n = int(value.strip())` binding earlier in the function (mypy
+            # complained about the redefinition).
+            serial_int: int | None = None
             if isinstance(value, int) and not isinstance(value, bool):
-                n = value
+                serial_int = value
             elif isinstance(value, float) and value.is_integer() and 1 <= value <= 1e9:
-                n = int(value)
-            if n is not None:
+                serial_int = int(value)
+            if serial_int is not None:
+                n = serial_int
                 decoded = _serial_to_date(n)
                 if decoded is not None:
                     candidates = _reverse_gene_date(decoded)
