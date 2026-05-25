@@ -7,7 +7,7 @@
   "name": "UnCorrupt",
   "identifier": "uncorrupt",
   "description": "Detection and prevention of Excel-style gene-symbol corruption in scientific spreadsheets. Detects gene symbols converted to dates (SEPT7 -> Sep-07), RIKEN/accession IDs coerced to floats (2310009E13 -> 2.31E+19), leading-zero stripping, Cyrillic/Greek/fullwidth homoglyphs, and the rest of the Excel pathology documented by Ziemann (2016, 2021) and Koh (2022). 95.16% cell-level recall (1591/1672) against the EPMC-expanded Ziemann 2021 S2 corpus (re-verified 2026-05-25); 100% recall (279/279) on Ziemann 2016; 100% post-boost precision at all user-facing confidence levels (>=0.50) on 2,180 xref-validated positive cells. Full replication scan covered 19,500 supplementary files across 11 genetics journals (2022-2026); flagged high-confidence corruption in 988 distinct papers.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "datePublished": "2026-05-19",
   "dateModified": "2026-05-19",
   "license": "https://spdx.org/licenses/Apache-2.0",

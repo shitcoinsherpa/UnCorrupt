@@ -1,9 +1,42 @@
 [project]
 name = "uncorrupt"
-version = "1.0.1"
+version = "1.0.2"
 description = "Detection and prevention of scientific identifier corruption in spreadsheets"
 requires-python = ">=3.12"
 readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+    {name = "LLMSherpa"},
+]
+keywords = [
+    "bioinformatics",
+    "genomics",
+    "gene-symbols",
+    "excel-corruption",
+    "spreadsheet-validation",
+    "HGNC",
+    "RIKEN",
+    "data-cleaning",
+    "reproducibility",
+    "FAIR",
+]
+# PyPI classifiers. shields.io reads the Python ones to populate
+# the pyversions badge; the others surface UnCorrupt in PyPI's
+# faceted search (Topic / Intended Audience / Development Status).
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Software Development :: Quality Assurance",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
 dependencies = [
     "pandas>=2.0",
     "openpyxl>=3.1",
@@ -33,6 +66,19 @@ dev = [
 [project.scripts]
 uncorrupt = "uncorrupt.cli:main"
 uncorrupt-app = "uncorrupt.app:_launch"
+
+# Project URLs surface on the PyPI sidebar. shields.io and discovery
+# tools also use them. Keep these in sync with the README and the
+# satellite repo links.
+[project.urls]
+Homepage = "https://github.com/shitcoinsherpa/UnCorrupt"
+Source = "https://github.com/shitcoinsherpa/UnCorrupt"
+Documentation = "https://github.com/shitcoinsherpa/UnCorrupt/blob/main/docs/methods.md"
+Changelog = "https://github.com/shitcoinsherpa/UnCorrupt/blob/main/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/shitcoinsherpa/UnCorrupt/issues"
+"Browser app" = "https://huggingface.co/spaces/Sherpa/uncorrupt"
+"Browser-only WASM" = "https://shitcoinsherpa.github.io/uncorrupt-pyodide/"
+"Release notes" = "https://github.com/shitcoinsherpa/UnCorrupt/releases"
 
 [build-system]
 requires = ["hatchling"]
