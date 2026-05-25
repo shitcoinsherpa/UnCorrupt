@@ -21,7 +21,7 @@ A browser tab opens at `http://localhost:7860`. Drop your file in, get a cleaned
 If you do not want to touch your local Python, run the published Docker image:
 
 ```bash
-docker run --rm -p 7860:7860 ghcr.io/shitcoinsherpa/uncorrupt:1.0.0
+docker run --rm -p 7860:7860 ghcr.io/shitcoinsherpa/uncorrupt:1.0.1
 ```
 
 Same UI, available at `http://localhost:7860`.
@@ -118,7 +118,7 @@ If the file is a published supplementary table you cannot edit, file an erratum 
   title   = {UnCorrupt: Repair Excel-mangled gene symbols in genomics spreadsheets},
   year    = {2026},
   url     = {https://github.com/shitcoinsherpa/UnCorrupt},
-  version = {1.0.0}
+  version = {1.0.1}
 }
 ```
 
