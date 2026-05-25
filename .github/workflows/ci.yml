@@ -9,60 +9,71 @@ on:
 
 jobs:
   tests:
-    name: pytest (fresh container, Python 3.12.13)
+    name: pytest (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build pinned image
-        run: docker build -t uncorrupt:ci .
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
 
-      - name: Run unit + integration tests
-        # Identical to the docker CMD — fresh container, pinned deps,
-        # excludes the gated 2 GB LLM-model download and the live-server
-        # integration suite (run those separately).
+      - name: Install package + dev extras
         run: |
-          docker run --rm uncorrupt:ci \
-            pytest -q \
-              --ignore=tests/test_app_local_llm.py \
-              --ignore=tests/test_app_integration.py
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint
+        run: |
+          ruff check src tests
+
+      - name: Type check
+        run: |
+          mypy src
+
+      - name: Unit + integration tests
+        run: |
+          pytest -q \
+            --ignore=tests/test_app_local_llm.py \
+            --ignore=tests/test_app_integration.py
 
       - name: Detector smoke pass on tiny fixture
-        # End-to-end smoke: import detector, run on a one-cell corrupted
-        # fixture, assert correct suggestion. Validates the package is
-        # actually usable from outside the test harness.
         run: |
-          docker run --rm uncorrupt:ci python -c "
+          python -c "
           from datetime import date
           import pandas as pd
           from uncorrupt.detector import detect
-          df = pd.DataFrame({'symbol': ['BRCA1', date(2014, 9, 15), 'TP53']})
-          df.attrs['cell_formats'] = {('symbol', 1): 'mmm-yy'}
+          df = pd.DataFrame({'gene_symbol': ['BRCA1', date(2024, 9, 2), 'TP53']})
+          df.attrs['cell_formats'] = {('gene_symbol', 1): 'd-mmm'}
           r = detect(df)
           s = next(x for x in r.suspicions if x.value.month == 9)
-          assert 'SEPT15' in s.suggestion, f'expected SEPT15, got {s.suggestion!r}'
+          assert 'SEPT2' in s.suggestion, f'expected SEPT2, got {s.suggestion!r}'
           print('smoke OK:', s.suggestion)
           "
 
-  manifest-verify:
-    name: corpus manifest exists + well-formed
+      - name: CLI smoke pass
+        run: |
+          uncorrupt --help
+          uncorrupt detect --help
+          uncorrupt schema --help
+          uncorrupt audit --help
+
+  docker-build:
+    name: Docker image builds
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate manifest JSON
-        # The actual SHA verification requires the 22 GB corpus locally —
-        # CI only checks that the manifest file is present and parseable.
-        # Full verify happens on a dev box: `python scripts/build_corpus_manifest.py --verify`
+
+      - name: Build image
+        run: docker build -t uncorrupt:ci .
+
+      - name: Smoke import in container
         run: |
-          if [ -f data/raw/CORPUS_MANIFEST.json ]; then
-            python3 -c "
-          import json, sys
-          m = json.load(open('data/raw/CORPUS_MANIFEST.json'))
-          z = len(m.get('ziemann_2021', {}))
-          k = len(m.get('koh_replication', {}))
-          print(f'manifest OK: ziemann={z}, koh={k}')
-          assert z > 0 or k > 0, 'manifest is empty'
-          "
-          else
-            echo "no CORPUS_MANIFEST.json yet — run scripts/build_corpus_manifest.py to generate"
-          fi
+          docker run --rm uncorrupt:ci python -c \
+            "from uncorrupt.detector import detect_file; from uncorrupt.app import build_app; print('container OK')"

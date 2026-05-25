@@ -5,8 +5,6 @@ from datetime import date
 from pathlib import Path
 
 import openpyxl
-import pandas as pd
-import pytest
 
 from uncorrupt.corrections import (
     Correction,

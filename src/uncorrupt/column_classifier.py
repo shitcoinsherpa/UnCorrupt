@@ -24,7 +24,7 @@ from typing import Literal
 import pandas as pd
 
 from .registries import GENE_LIKE_PATTERN, RIKEN_PATTERN
-from .xref_lookup import XrefIndex, _ID_PATTERNS
+from .xref_lookup import _ID_PATTERNS, XrefIndex
 
 ColumnType = Literal[
     "gene_symbol",      # gene symbol candidates (date-corruption plausible)

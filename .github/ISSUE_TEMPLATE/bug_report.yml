@@ -1,0 +1,79 @@
+name: Bug report
+description: UnCorrupt did the wrong thing on a real file.
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. The single most useful thing you can attach is **the file that broke it** (or a minimal redacted version that still reproduces the problem). That turns into a regression test almost mechanically.
+
+        Before filing, please confirm the problem reproduces on the latest release: `pip install --upgrade uncorrupt`.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did UnCorrupt do, and what did you expect?
+      placeholder: |
+        I ran `uncorrupt detect mydata.xlsx` and it flagged row 47 as a Cyrillic homoglyph.
+        Row 47 is actually a real gene called BRCA1 with normal ASCII letters.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How to reproduce
+      description: Exact commands you ran. If you can attach the file, drop it in here.
+      placeholder: |
+        $ uncorrupt detect mydata.xlsx --json > report.json
+        (attaching mydata.xlsx)
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: UnCorrupt version
+      description: Output of `uncorrupt --version`
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      description: Output of `python --version`
+      placeholder: "Python 3.12.7"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-path
+    attributes:
+      label: How you installed it
+      options:
+        - "pip install uncorrupt"
+        - "Docker image (ghcr.io/shitcoinsherpa/uncorrupt)"
+        - "HuggingFace Space (browser)"
+        - "Pyodide (browser)"
+        - "Built from source"
+        - "Other (describe below)"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "macOS 14.5, Ubuntu 22.04, Windows 11, ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: anything-else
+    attributes:
+      label: Anything else
+      description: JSON report, screenshots, related issues, prior workarounds.

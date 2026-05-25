@@ -22,13 +22,13 @@ import shutil
 import tempfile
 import warnings
 from dataclasses import asdict, dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import openpyxl
 
-from .detector import Suspicion, detect_file
+from .detector import detect_file
 
 
 @dataclass
@@ -80,7 +80,7 @@ def propose_corrections(file_path: str) -> list[Correction]:
     return out
 
 
-def _resolve_openpyxl_cell(ws, pandas_column: str, pandas_row: int) -> "openpyxl.cell.Cell | None":
+def _resolve_openpyxl_cell(ws, pandas_column: str, pandas_row: int) -> openpyxl.cell.Cell | None:
     """Map pandas (column_label, 0-based row) → openpyxl cell.
 
     Convention used elsewhere in this codebase:
@@ -253,8 +253,9 @@ def compute_analytics(corrections: list[Correction]) -> dict:
           "totals": raw counts dict for tests
         }
     """
-    import pandas as pd
     from collections import Counter
+
+    import pandas as pd
 
     if not corrections:
         empty = pd.DataFrame({"bucket": [], "count": []})
@@ -290,7 +291,7 @@ def compute_analytics(corrections: list[Correction]) -> dict:
         f"**{n_med}** medium (review), **{n_low}** low (review)\n"
         f"- By detection kind: " +
         ", ".join(f"**{k}** = {v}" for k, v in kinds.most_common()) + "\n"
-        f"- By gene family (proposed): " +
+        "- By gene family (proposed): " +
         ", ".join(f"**{k}** = {v}"
                    for k, v in families.most_common() if k != "OTHER") +
         (f", OTHER = {families['OTHER']}" if families.get("OTHER") else "")

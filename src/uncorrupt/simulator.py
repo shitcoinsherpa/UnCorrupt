@@ -8,7 +8,7 @@ Empirically confirmed on 2026-05-14 against LibreOffice 7.3.7.2 headless:
 """
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date
 from typing import Any
 
 from .registries import EXPONENT_PATTERN

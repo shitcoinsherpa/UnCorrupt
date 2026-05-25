@@ -11,32 +11,35 @@ build/
 *.egg-info/
 .env
 env/google-service-account.json
-data/raw/*
-!data/raw/.gitkeep
-!data/raw/CORPUS_MANIFEST.json
-# Canonical reference data — small, stable, required by the test suite
-!data/raw/registries/
-!data/raw/registries/**
-!data/raw/ziemann_2021_corpus/
-data/raw/ziemann_2021_corpus/*
-!data/raw/ziemann_2021_corpus/S1_ensembl_*.xlsx
-!data/raw/ziemann_2021_corpus/S2_articles_*.xlsx
-!data/raw/ziemann_2021_corpus/MANUAL_FETCH_MANIFEST.tsv
-data/derived/*
-!data/derived/.gitkeep
+
+# Results: gitignored by default; regenerable from the source corpora and
+# the scripts in the research workspace. Specific ledger / report files
+# that the public README/CHANGELOG cite as evidence are whitelisted below
+# so the claims are traceable in the cloned repo.
 results/*
 !results/.gitkeep
+!results/cell_level_validation_2026-05-25_verified.jsonl
+!results/koh_walk_2026-05-25_verified.checkpoint.json
+!results/ziemann_2016_validation.jsonl
+!results/ziemann_2016_validation.md
+!results/calibration_ci_report.md
+!results/calibration_ci_report.json
+!results/calibration_with_fp_anchors.md
+!results/mutation_report.md
+!results/platt_scaling_report.md
+
 .DS_Store
 .playwright-mcp/
 *.log
 nohup.out
-# Personal-environment tooling — not part of the public artifact
+
+# Personal-environment tooling: not part of the public artifact.
 .aiwg/
 .claude/
 AIWG.md
 CLAUDE.md
 
-# Dev scratch / scratch-pad files — never commit
+# Dev scratch / scratch-pad files: never commit.
 scratch/
 scratch_*.py
 debug_*.py
@@ -65,24 +68,19 @@ $RECYCLE.BIN/
 *.egg
 *.whl
 pip-wheel-metadata/
-!data/raw/ziemann_2016_corpus/
-data/raw/ziemann_2016_corpus/*
-!data/raw/ziemann_2016_corpus/Additional_file_1.xlsx
-!data/raw/ziemann_2016_corpus/fetch_ledger.jsonl
-!data/raw/riken_validation/
-data/raw/riken_validation/*
 
-# Mutation-testing work directory (cosmic-ray / mutmut copy the tree)
+# Mutation-testing work directories (research workspace only).
 mutants/
 .mutmut-cache/
 
-# Multi-species xref raw downloads — large (>120 MB combined),
-# refetchable via `scripts/refresh_multispecies_xref.py`. The PARSED
-# `.xref.tsv` files ARE committed (they're the canonical artifact).
-data/raw/registries/MGI_EntrezGene.rpt
-data/raw/registries/MRK_ENSEMBL.rpt
-data/raw/registries/BGI_FB.json.gz
-data/raw/registries/BGI_WB.json.gz
-data/raw/registries/zfin_aliases.txt
-data/raw/registries/zfin_ensembl_1_to_1.txt
-data/raw/registries/zfin_gene.txt
+# Raw multi-species downloads (large, refetchable via
+# `scripts/refresh_multispecies_xref.py`; only the parsed `.xref.tsv`
+# files inside src/uncorrupt/_data/registries/ ship in the wheel).
+src/uncorrupt/_data/registries/MGI_EntrezGene.rpt
+src/uncorrupt/_data/registries/MRK_ENSEMBL.rpt
+src/uncorrupt/_data/registries/BGI_FB.json.gz
+src/uncorrupt/_data/registries/BGI_WB.json.gz
+src/uncorrupt/_data/registries/Rattus_norvegicus.gene_info.gz
+src/uncorrupt/_data/registries/zfin_aliases.txt
+src/uncorrupt/_data/registries/zfin_ensembl_1_to_1.txt
+src/uncorrupt/_data/registries/zfin_gene.txt

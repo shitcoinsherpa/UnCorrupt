@@ -14,8 +14,8 @@ from __future__ import annotations
 
 from datetime import date
 
-import pytest
-from hypothesis import HealthCheck, assume, given, settings, strategies as st
+from hypothesis import HealthCheck, assume, given, settings
+from hypothesis import strategies as st
 
 from uncorrupt.detector import (
     _candidates_for_month_and_n,
@@ -135,7 +135,7 @@ def test_serial_to_date_round_trip(n: int) -> None:
     d = _serial_to_date(n)
     assert d is not None
     # Round-trip
-    from datetime import date as _date, timedelta
+    from datetime import date as _date
     epoch = _date(1899, 12, 30)
     recovered = (d - epoch).days
     assert recovered == n

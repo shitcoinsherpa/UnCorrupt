@@ -18,8 +18,14 @@ from pathlib import Path
 
 import pandas as pd
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DATA_RAW = PROJECT_ROOT / "data" / "raw"
+_PACKAGE_DIR = Path(__file__).resolve().parent
+# Registry data files (HGNC + multispecies xref) ship bundled inside the
+# package at src/uncorrupt/_data/. Fall back to the dev-checkout layout
+# if running from a source tree where the data has been split out.
+DATA_RAW = _PACKAGE_DIR / "_data"
+_DEV_FALLBACK = _PACKAGE_DIR.parents[1] / "data" / "raw"
+if not DATA_RAW.exists() and _DEV_FALLBACK.exists():
+    DATA_RAW = _DEV_FALLBACK
 
 
 def _latest(glob: str) -> Path:

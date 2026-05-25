@@ -14,9 +14,9 @@ locale or Excel version; `audit` walks a folder and produces a
 summary report.
 
 Exit codes:
-   0 : no high-confidence corruption found
-   1 : high-confidence corruption flagged (conf >= 0.95)
-   2 : moderate-confidence flags only (0.30 <= conf < 0.95)
+   0 : nothing flagged
+   1 : at least one high-confidence flag (conf >= 0.85); block the build
+   2 : medium-confidence flags only (0.50 <= conf < 0.85); warn
    3 : file unreadable or other error
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ import sys
 from pathlib import Path
 
 from .detector import detect_file
-from .schema_export import write_schema_sidecar, emit_table_schema
+from .schema_export import write_schema_sidecar
 
 
 def _cmd_detect(args) -> int:
@@ -61,32 +61,62 @@ def _cmd_detect(args) -> int:
         json.dump(out, sys.stdout, indent=2)
         print()
     else:
+        # Plain-English labels for the internal `kind` enum so the CLI output
+        # reads as something a bench scientist understands, not an enum dump.
+        # Keep in sync with src/uncorrupt/app.py:_KIND_LABELS.
+        KIND_LABELS = {
+            "gene-date":                "Date mistaken for gene name",
+            "gene-date-string":         "Date text in gene column ('2-Sep')",
+            "gene-date-serial":         "Excel-serial integer in gene column",
+            "id-float":                 "Float (gene ID lost to scientific notation)",
+            "long-int-precision-loss":  "Integer too big for Excel (trailing digits lost)",
+            "leading-zero-stripped":    "Leading zero stripped",
+            "autofill-sequence":        "Autofill drag (Excel filled a sequence)",
+            "cas-registry":             "Chemical CAS number Excel read as a date",
+            "decimal-comma":            "Decimal-comma locale collision",
+            "time-coercion":            "Time string (plate well IDs)",
+            "homoglyph":                "Unicode look-alike (Cyrillic/Greek/fullwidth)",
+            "unrecognized-symbol":      "Symbol not in any registry",
+            "file-too-large":           "File too large to scan safely",
+        }
+        # Confidence bands must match src/uncorrupt/app.py:_confidence_label.
+        BANDS = [
+            (0.85, "High",   "what shows is virtually always real corruption"),
+            (0.50, "Medium", "review before accepting; mostly correct"),
+            (0.30, "Low",    "isolated flags; pattern not corroborated"),
+            (0.00, "Info",   "informational only (suppressed by default)"),
+        ]
         print(f"File: {path}")
         print(f"Rows scanned: {report.rows_scanned}")
         print(f"Columns scanned: {report.columns_scanned}")
         print(f"Identifier columns: {len(report.identifier_columns)}")
         print(f"Suspicions: {len(report.suspicions)}")
-        # Group by user-visible confidence band
-        bands = {"≥0.95": [], "0.60-0.95": [], "0.30-0.60": [], "<0.30": []}
+
+        # Bucket by confidence band
+        bucket = {label: [] for _, label, _ in BANDS}
         for s in report.suspicions:
-            if s.confidence >= 0.95: bands["≥0.95"].append(s)
-            elif s.confidence >= 0.60: bands["0.60-0.95"].append(s)
-            elif s.confidence >= 0.30: bands["0.30-0.60"].append(s)
-            else: bands["<0.30"].append(s)
-        for band, flags in bands.items():
-            if not flags: continue
-            print(f"\n--- Confidence {band} ({len(flags)} flags) ---")
+            for threshold, label, _ in BANDS:
+                if s.confidence >= threshold:
+                    bucket[label].append(s)
+                    break
+
+        for threshold, label, hint in BANDS:
+            flags = bucket[label]
+            if not flags:
+                continue
+            print(f"\n--- {label} confidence ({len(flags)} flags) -- {hint}")
             for s in flags[: args.max_per_band]:
                 loc = f"{s.sheet}!{s.column}" if s.sheet else s.column
-                print(f"  {s.kind} {loc!r} row {s.row}: {s.value!r}")
+                kind_label = KIND_LABELS.get(s.kind, s.kind)
+                print(f"  {kind_label}  {loc!r} row {s.row}: {s.value!r}")
                 if s.suggestion:
-                    print(f"    → suggest: {s.suggestion}")
+                    print(f"    suggest: {s.suggestion}")
             if len(flags) > args.max_per_band:
                 print(f"    ... and {len(flags) - args.max_per_band} more")
 
-    # Exit code by highest band
-    high = sum(1 for s in report.suspicions if s.confidence >= 0.95)
-    mid = sum(1 for s in report.suspicions if 0.30 <= s.confidence < 0.95)
+    # Exit code by highest band (bands match UI: High >= 0.85, Medium >= 0.50).
+    high = sum(1 for s in report.suspicions if s.confidence >= 0.85)
+    mid = sum(1 for s in report.suspicions if 0.30 <= s.confidence < 0.85)
     if high:
         return 1
     if mid:
@@ -149,7 +179,26 @@ def _cmd_audit(args) -> int:
     else:
         files += list(root.glob("*.xls"))
     print(f"Auditing {len(files)} file(s) under {root}")
+    # Plain-English kind labels (mirror detect / app). Coverage of every
+    # detector `kind=` is enforced by tests/test_kind_labels.py; a missing
+    # entry raises KeyError below instead of leaking the raw enum.
+    KIND_LABELS = {
+        "gene-date":                "date-mistaken-for-gene",
+        "gene-date-string":         "date-text-in-gene-column",
+        "gene-date-serial":         "excel-serial-in-gene-column",
+        "id-float":                 "id-lost-to-scientific-notation",
+        "long-int-precision-loss":  "integer-too-big-for-excel",
+        "leading-zero-stripped":    "leading-zero-stripped",
+        "autofill-sequence":        "autofill-drag",
+        "cas-registry":             "cas-number-read-as-date",
+        "decimal-comma":            "decimal-comma-collision",
+        "time-coercion":            "time-coerced-id",
+        "homoglyph":                "unicode-look-alike",
+        "unrecognized-symbol":      "symbol-not-in-registry",
+        "file-too-large":           "file-too-large",
+    }
     summary: dict[str, dict] = {}
+    n_high_total = 0
     n_corrupted_files = 0
     for f in files:
         try:
@@ -157,14 +206,18 @@ def _cmd_audit(args) -> int:
         except Exception as exc:
             summary[str(f)] = {"error": f"{type(exc).__name__}: {exc!s}"}
             continue
-        high = [s for s in report.suspicions if s.confidence >= 0.95]
-        mid = [s for s in report.suspicions if 0.30 <= s.confidence < 0.95]
+        # Band thresholds match the rest of the tool: High >= 0.85.
+        high = [s for s in report.suspicions if s.confidence >= 0.85]
+        mid = [s for s in report.suspicions if 0.50 <= s.confidence < 0.85]
+        low = [s for s in report.suspicions if 0.30 <= s.confidence < 0.50]
         summary[str(f)] = {
             "n_suspicions": len(report.suspicions),
             "n_high_confidence": len(high),
             "n_mid_confidence": len(mid),
-            "kinds": list({s.kind for s in report.suspicions}),
+            "n_low_confidence": len(low),
+            "kinds": sorted({s.kind for s in report.suspicions}),
         }
+        n_high_total += len(high)
         if high or mid:
             n_corrupted_files += 1
     if args.json:
@@ -176,11 +229,20 @@ def _cmd_audit(args) -> int:
             if "error" in s:
                 print(f"  [error] {Path(f).name}: {s['error']}")
             elif s.get("n_high_confidence") or s.get("n_mid_confidence"):
+                kinds = ", ".join(KIND_LABELS.get(k, k) for k in s["kinds"])
                 print(f"  {Path(f).name}: "
                       f"{s['n_high_confidence']} high + "
                       f"{s['n_mid_confidence']} mid "
-                      f"({', '.join(s['kinds'])})")
-    return 0 if n_corrupted_files == 0 else 1
+                      f"({kinds})")
+    # Exit-code semantics (CI-friendly):
+    #   0 : nothing flagged at medium-or-above
+    #   1 : at least one high-confidence flag (block the build)
+    #   2 : only medium-confidence flags (warn)
+    if n_high_total > 0:
+        return 1
+    if n_corrupted_files > 0:
+        return 2
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:

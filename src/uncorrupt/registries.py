@@ -39,7 +39,7 @@ NON_IDENTIFIER_HEADER_HINTS: set[str] = {
 }
 
 
-def _load() -> "HGNCRegistry":
+def _load() -> HGNCRegistry:
     from .corpus import load_hgnc
     try:
         return load_hgnc()
@@ -58,6 +58,6 @@ HGNC_RENAME_MAP: dict[str, str] = _HGNC.prev_symbol_to_current
 HGNC_ALIAS_MAP: dict[str, str] = _HGNC.alias_to_current
 
 
-def get_hgnc() -> "HGNCRegistry":
+def get_hgnc() -> HGNCRegistry:
     """Access the loaded HGNC registry."""
     return _HGNC

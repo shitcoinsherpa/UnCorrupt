@@ -19,7 +19,6 @@ from __future__ import annotations
 
 from datetime import date
 
-import openpyxl
 import pandas as pd
 import pytest
 
@@ -29,7 +28,6 @@ from uncorrupt.detector import (
     _serial_to_date,
     detect,
 )
-
 
 # --- _serial_to_date boundary --------------------------------------------
 

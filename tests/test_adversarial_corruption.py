@@ -33,7 +33,7 @@ Koh 2022 (Sci Rep), Pyle 2017 ("Escape Excel"), Unicode TR39.
 from __future__ import annotations
 
 import sys
-from datetime import date, datetime
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
