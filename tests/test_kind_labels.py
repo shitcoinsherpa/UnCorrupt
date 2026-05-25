@@ -38,18 +38,19 @@ def _label_dicts_in(path: Path) -> list[dict[str, str]]:
     class Visitor(ast.NodeVisitor):
         def visit_Assign(self, node: ast.Assign) -> None:
             for t in node.targets:
-                if isinstance(t, ast.Name) and "KIND" in t.id.upper():
-                    if isinstance(node.value, ast.Dict):
-                        d: dict[str, str] = {}
-                        for k, v in zip(node.value.keys, node.value.values,
-                                         strict=False):
-                            if (isinstance(k, ast.Constant)
-                                    and isinstance(v, ast.Constant)
-                                    and isinstance(k.value, str)
-                                    and isinstance(v.value, str)):
-                                d[k.value] = v.value
-                        if d:
-                            out.append(d)
+                if (isinstance(t, ast.Name)
+                        and "KIND" in t.id.upper()
+                        and isinstance(node.value, ast.Dict)):
+                    d: dict[str, str] = {}
+                    for k, v in zip(node.value.keys, node.value.values,
+                                     strict=False):
+                        if (isinstance(k, ast.Constant)
+                                and isinstance(v, ast.Constant)
+                                and isinstance(k.value, str)
+                                and isinstance(v.value, str)):
+                            d[k.value] = v.value
+                    if d:
+                        out.append(d)
             self.generic_visit(node)
 
     Visitor().visit(tree)

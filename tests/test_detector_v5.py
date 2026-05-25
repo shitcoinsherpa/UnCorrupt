@@ -456,7 +456,7 @@ def test_calamine_loader_for_large_xlsx(tmp_path: Path) -> None:
     for the detector to behave consistently."""
     import pandas as pd
 
-    from uncorrupt.app import _load_all_sheets, _load_xlsx_calamine
+    from uncorrupt.app import _load_xlsx_calamine
     f = tmp_path / "small.xlsx"
     pd.DataFrame({
         "gene": ["BRCA1", "TP53", "EGFR", "MARCHF1", "SEPTIN2"],

@@ -53,6 +53,15 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
+# Style-only rules we intentionally allow:
+#   E501  Long lines (occasionally needed for readable regex / tables).
+#   E402  Module-level imports not at top: detector.py defers heavy imports
+#         (numpy, openpyxl) until needed so `python -c "from uncorrupt ..."`
+#         stays fast.
+#   E701  Single-line `if cond: continue` is acceptable for short guards.
+#   B007  Unused loop variable: occurs in our band-bucketing loop where the
+#         threshold value is the loop key, deliberately unused in the body.
+ignore = ["E501", "E402", "E701", "B007"]
 
 [tool.mypy]
 python_version = "3.12"

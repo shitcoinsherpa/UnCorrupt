@@ -37,6 +37,8 @@ def _serial_to_date(n: int) -> date | None:
     except (OverflowError, ValueError):
         return None
 
+import contextlib
+
 from .homoglyph import looks_like_gene_after_repair as _homoglyph_repair
 from .registries import (
     GENE_LIKE_PATTERN,
@@ -349,10 +351,8 @@ def _parse_date_string(s: str) -> list[date]:
     # ISO YYYY-MM-DD (optionally with time) : unambiguous
     m = re.match(r"^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T]\d{1,2}:\d{1,2}(?::\d{1,2})?)?$", s)
     if m:
-        try:
+        with contextlib.suppress(ValueError):
             candidates.append(date(int(m.group(1)), int(m.group(2)), int(m.group(3))))
-        except ValueError:
-            pass
         return candidates
     # Month-name forms : separators include `-`, `/`, `.` (German locale);
     # month token includes Latin + accented chars (German Mär, French déc).
@@ -370,10 +370,8 @@ def _parse_date_string(s: str) -> list[date]:
         if year < 100:
             year += 2000
         if mon and 1 <= day <= 31:
-            try:
+            with contextlib.suppress(ValueError):
                 candidates.append(date(year, mon, day))
-            except ValueError:
-                pass
         return candidates
     m = re.match(
         rf"^({_MONTH_TOK})[-/.](\d{{1,2}})(?:[-/.](\d{{2,4}}))?$",
@@ -386,10 +384,8 @@ def _parse_date_string(s: str) -> list[date]:
         if year < 100:
             year += 2000
         if mon and 1 <= day <= 31:
-            try:
+            with contextlib.suppress(ValueError):
                 candidates.append(date(year, mon, day))
-            except ValueError:
-                pass
         return candidates
     # All-numeric: try both DD/MM/YY and MM/DD/YY since locale is unknown
     m = re.match(r"^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2,4})$", s)
@@ -757,9 +753,7 @@ def _column_is_any_identifier(col_name: str, series: pd.Series) -> bool:
     if cls.column_type in _IDENTIFIER_LIKE_COLUMN_TYPES:
         return True
     tokens = _header_tokens(col_name)
-    if _tokens_match_hint_set(tokens, IDENTIFIER_HEADER_HINTS):
-        return True
-    return False
+    return bool(_tokens_match_hint_set(tokens, IDENTIFIER_HEADER_HINTS))
 
 
 def _detect_numeric_id_corruptions(
@@ -1150,9 +1144,9 @@ def detect(df: pd.DataFrame, sheet: str | None = None) -> Report:
             _n_nonnull += 1
             if isinstance(_v, (int, float)) and not isinstance(_v, bool):
                 _n_numeric += 1
-        if _n_nonnull >= 10 and not _header_says_identifier:
-            if _n_numeric / _n_nonnull >= 0.95:
-                quantitative_measurement_columns.add(str(_col))
+        if (_n_nonnull >= 10 and not _header_says_identifier
+                and _n_numeric / _n_nonnull >= 0.95):
+            quantitative_measurement_columns.add(str(_col))
 
     # Pass 1: column-context-aware detection (high confidence)
     for col in df.columns:
@@ -1473,10 +1467,7 @@ def detect(df: pd.DataFrame, sheet: str | None = None) -> Report:
                     continue
                 candidates, unique_canonical = _canonicalize_candidates(candidates)
                 suggestion = " | ".join(candidates)
-                if len(candidates) == 1:
-                    confidence = 0.45
-                else:
-                    confidence = 0.30 if unique_canonical else 0.25
+                confidence = 0.45 if len(candidates) == 1 else 0.3 if unique_canonical else 0.25
                 reason_text = "date matches uncorrupt signature (no column context)"
                 if fmt:
                     reason_text += f"; cell format {fmt!r}"
@@ -1973,7 +1964,7 @@ def _detect_autofill_sequences(
         runs: list[list[tuple[int, date]]] = []
         cur: list[tuple[int, date]] = [date_cells[0]]
         cur_band: tuple[int, int, int] | None = None
-        for prev, nxt in zip(date_cells, date_cells[1:]):
+        for prev, nxt in zip(date_cells, date_cells[1:], strict=False):
             diff = (nxt[1] - prev[1]).days
             row_gap = nxt[0] - prev[0]
             band = _diff_in_band(diff)
@@ -2049,10 +2040,10 @@ def _apply_row_context_boost(
             if canonical:
                 expanded.add(canonical)
             for old, new in hgnc.prev_symbol_to_current.items():
-                if new == s or new == canonical:
+                if new in (s, canonical):
                     expanded.add(old)
             for alias, new in hgnc.alias_to_current.items():
-                if new == s or new == canonical:
+                if new in (s, canonical):
                     expanded.add(alias)
         return expanded
 
