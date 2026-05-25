@@ -18,7 +18,7 @@
 
 Drop your `.xlsx` or `.csv` in. Get a report. Download the fixed file. Your data is processed once and discarded; nothing is logged.
 
-For data that can't leave your machine: there's a [browser-only version](https://github.com/shitcoinsherpa/uncorrupt-pyodide) where everything runs in your own browser tab, no upload anywhere.
+For data that can't leave your machine: the [browser-only Pyodide version](https://shitcoinsherpa.github.io/uncorrupt-pyodide/) runs entirely in your own browser tab via WebAssembly. Your file never gets uploaded anywhere; the detector runs locally on your CPU. ([source code](https://github.com/shitcoinsherpa/uncorrupt-pyodide))
 
 ## How well does it work
 
