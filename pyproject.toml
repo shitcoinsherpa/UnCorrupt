@@ -1,6 +1,6 @@
 [project]
 name = "uncorrupt"
-version = "1.0.0"
+version = "1.0.1"
 description = "Detection and prevention of scientific identifier corruption in spreadsheets"
 requires-python = ">=3.12"
 readme = "README.md"

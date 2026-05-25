@@ -59,7 +59,7 @@ That opens the UI at http://localhost:7860 in your browser.
 **Or via Docker** if you do not want to touch your local Python:
 
 ```bash
-docker run --rm -p 7860:7860 ghcr.io/shitcoinsherpa/uncorrupt:1.0.0
+docker run --rm -p 7860:7860 ghcr.io/shitcoinsherpa/uncorrupt:1.0.1
 ```
 
 **As a command line tool** for pipelines and CI:
@@ -99,7 +99,7 @@ Open an issue: https://github.com/shitcoinsherpa/UnCorrupt/issues. The fastest f
   title   = {UnCorrupt: Repair Excel-mangled gene symbols in genomics spreadsheets},
   year    = {2026},
   url     = {https://github.com/shitcoinsherpa/UnCorrupt},
-  version = {1.0.0}
+  version = {1.0.1}
 }
 ```
 
