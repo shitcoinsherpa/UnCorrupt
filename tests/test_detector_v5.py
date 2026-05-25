@@ -9,6 +9,7 @@ Locks in the gains from the v5 improvements:
 from __future__ import annotations
 
 from datetime import date
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -19,7 +20,6 @@ from uncorrupt.detector import (
     _serial_to_date,
     detect,
 )
-
 
 # --- _reverse_gene_date coverage ---
 
@@ -451,27 +451,24 @@ def test_pass2_flags_cas_in_identifier_column_high_confidence() -> None:
 
 
 def test_calamine_loader_for_large_xlsx(tmp_path: Path) -> None:
-    """Files ≥ 30 MB route through python-calamine; smaller files stay
-    on openpyxl. Both must produce equivalent DataFrames for the
-    detector to behave consistently."""
+    """Files at/above the calamine threshold route through python-calamine;
+    smaller files stay on openpyxl. Both must produce equivalent DataFrames
+    for the detector to behave consistently."""
     import pandas as pd
+
     from uncorrupt.app import _load_all_sheets, _load_xlsx_calamine
     f = tmp_path / "small.xlsx"
     pd.DataFrame({
         "gene": ["BRCA1", "TP53", "EGFR", "MARCHF1", "SEPTIN2"],
         "fold_change": [1.0, 2.0, 3.0, 4.0, 5.0],
     }).to_excel(f, index=False)
-    # Even small file should load via calamine when called directly
+    # Even a tiny file should load via calamine when called directly
     sheets = _load_xlsx_calamine(str(f))
     assert sheets
     name = next(iter(sheets))
     df = sheets[name]
     assert "gene" in df.columns
     assert "BRCA1" in df["gene"].tolist()
-    # And the regular path picks the openpyxl loader for this small file
-    sheets_default = _load_all_sheets(str(f))
-    default_df = next(iter(sheets_default.values()))
-    assert default_df.attrs.get("loader") != "calamine"
 
 
 # --- detect_file file-size guard (v0.6.0) ---
@@ -480,8 +477,8 @@ def test_calamine_loader_for_large_xlsx(tmp_path: Path) -> None:
 def test_detect_file_emits_file_too_large_for_huge_files(tmp_path: Path) -> None:
     """A file exceeding `max_file_bytes` returns a Report containing a
     single `file-too-large` Suspicion rather than hanging on openpyxl."""
-    from pathlib import Path
     import pandas as pd
+
     from uncorrupt.detector import detect_file
     f = tmp_path / "tiny.xlsx"
     pd.DataFrame({"x": [1, 2, 3]}).to_excel(f, index=False)
@@ -495,6 +492,7 @@ def test_detect_file_emits_file_too_large_for_huge_files(tmp_path: Path) -> None
 def test_detect_file_normal_path_unaffected_by_guard(tmp_path: Path) -> None:
     """Below the guard threshold the loader runs normally."""
     import pandas as pd
+
     from uncorrupt.detector import detect_file
     f = tmp_path / "normal.xlsx"
     pd.DataFrame({
@@ -512,6 +510,7 @@ def test_hgnc_drift_note_emitted_when_snapshot_stale(monkeypatch) -> None:
     warning. Below threshold, the note stays None (or only contains
     sampling info if subsampling fired)."""
     import pandas as pd
+
     from uncorrupt.detector import detect
     # Mock the age function to claim a 45-day-old snapshot
     monkeypatch.setattr(

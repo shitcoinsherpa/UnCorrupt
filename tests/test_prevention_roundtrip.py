@@ -82,6 +82,7 @@ def _validate_with_frictionless(csv_path: Path, sidecar_path: Path,
     paths are 'safe' (frictionless's default policy rejects absolute
     paths outside the cwd)."""
     import os
+
     from frictionless import Resource
     cwd = os.getcwd()
     try:

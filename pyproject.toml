@@ -8,20 +8,26 @@ dependencies = [
     "pandas>=2.0",
     "openpyxl>=3.1",
     "xlrd>=2.0",
-    "python-calamine>=0.6",  # fast loader for big xlsx (v0.6)
+    "python-calamine>=0.6",  # fast loader for big xlsx
     "frictionless>=5.0",
     "python-dateutil>=2.9",
     "confusable-homoglyphs>=3.3",
+    "gradio>=5.0",            # the desktop UI ships by default
 ]
 
 [project.optional-dependencies]
-ui = ["gradio>=5.0"]
-llm = ["transformers", "torch", "accelerate"]
-calibration = ["scikit-learn>=1.3", "matplotlib>=3.7"]
-mutation = ["cosmic-ray>=8.4"]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=4",
+    "hypothesis>=6",
+    "mypy>=1.10",
+    "ruff>=0.5",
+    "build>=1",
+]
 
 [project.scripts]
 uncorrupt = "uncorrupt.cli:main"
+uncorrupt-app = "uncorrupt.app:_launch"
 
 [build-system]
 requires = ["hatchling"]
@@ -29,6 +35,12 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/uncorrupt"]
+# Ship registry data inside the package so pip installs work standalone.
+[tool.hatch.build.targets.wheel.shared-data]
+"src/uncorrupt/_data" = "uncorrupt/_data"
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/uncorrupt/_data" = "uncorrupt/_data"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -46,24 +58,3 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
 python_version = "3.12"
 strict = true
 files = ["src", "tests"]
-
-[tool.mutmut]
-# Scope mutation testing to the detection hot-path. Utility/IO modules
-# (app.py loader plumbing, schema_export, corrections) are out of scope
-# for the initial pass; extend after detector kill rate is >= 90%.
-paths_to_mutate = ["src/uncorrupt/detector.py"]
-mutate_only_covered_lines = false
-# Skip tests that load big corpus data files (they don't exercise
-# detector.py mutants and the data isn't copied into the mutants/ tree).
-pytest_add_cli_args = [
-    "--forked",  # subprocess-isolate each test (works around numpy "cannot load twice")
-    "--ignore=tests/test_app_integration.py",
-    "--ignore=tests/test_app_local_llm.py",
-    "--ignore=tests/test_corpus.py",
-    "--ignore=tests/test_precision.py",
-    "--ignore=tests/test_koh_replication.py",
-    "--ignore=tests/test_misnamed_files.py",
-    "--ignore=tests/test_xref_lookup.py",
-    "--ignore=tests/test_benchmark.py",
-]
-also_copy = ["src/", "tests/", "data/raw/registries/"]

@@ -1,0 +1,39 @@
+name: Feature request
+description: A new detection rule, a new output format, a new integration.
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing this. UnCorrupt's bar for new detection rules is high: every rule needs a real-world example it catches AND a negative-control example showing it doesn't false-positive. If you can attach both, the change usually lands quickly.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve
+      description: What corruption pattern, workflow gap, or pipeline integration is currently missing?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+      description: What should `uncorrupt` do that it doesn't do today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Example inputs
+      description: |
+        For a new detection rule: a file the current detector misses, and a file the new rule should NOT flag.
+        For a new output format / integration: an example of the desired output.
+      render: shell
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+      description: Workarounds you tried, related tools, prior art (papers, GitHub issues elsewhere).

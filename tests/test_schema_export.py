@@ -6,7 +6,6 @@ from datetime import date
 from pathlib import Path
 
 import pandas as pd
-import pytest
 from frictionless import Schema
 
 from uncorrupt.detector import detect

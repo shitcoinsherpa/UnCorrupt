@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import io
 import json
-from contextlib import redirect_stdout, redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from datetime import date
 from pathlib import Path
 
@@ -177,8 +177,10 @@ def test_audit_clean_folder_exits_zero(tmp_path):
     assert "Files with corruption flags: 0/3" in out
 
 
-def test_audit_dirty_folder_exits_one(tmp_path):
-    """Folder containing at least one corrupted file: exit 1."""
+def test_audit_dirty_folder_exits_nonzero(tmp_path):
+    """Folder containing at least one corrupted file exits non-zero. The
+    audit command distinguishes high-confidence (1) from medium-only (2);
+    either is a 'something was flagged' signal CI should fail on."""
     _write_xlsx(tmp_path / "clean.xlsx",
                 pd.DataFrame({"gene_symbol": ["BRCA1", "TP53", "EGFR"] * 4}))
     _write_xlsx(tmp_path / "corrupt.xlsx", pd.DataFrame({"gene_symbol": [
@@ -187,7 +189,9 @@ def test_audit_dirty_folder_exits_one(tmp_path):
         "ATP13A1", "APBB1IP", "FOXO1",
     ]}))
     rc, _, _ = _run(["audit", str(tmp_path), "--no-boost"])
-    assert rc == 1
+    assert rc in (1, 2), (
+        f"expected exit 1 (high) or 2 (medium-only); got {rc}"
+    )
 
 
 def test_audit_recursive_finds_nested(tmp_path):
@@ -203,9 +207,9 @@ def test_audit_recursive_finds_nested(tmp_path):
     rc_flat, out_flat, _ = _run(["audit", str(tmp_path), "--no-boost"])
     assert rc_flat == 0
     assert "Auditing 0 file(s)" in out_flat
-    # Recursive: finds nested corrupt file, exit 1
+    # Recursive: finds the nested corrupt file, exit 1 (high) or 2 (medium).
     rc_rec, _, _ = _run(["audit", str(tmp_path), "-r", "--no-boost"])
-    assert rc_rec == 1
+    assert rc_rec in (1, 2)
 
 
 def test_audit_missing_folder_exits_three(tmp_path):

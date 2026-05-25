@@ -12,19 +12,14 @@ These are the two confidence-improving mechanisms added per Proposals A + B:
 from __future__ import annotations
 
 from datetime import date
-from pathlib import Path
 
-import openpyxl
 import pandas as pd
 import pytest
 
 from uncorrupt.detector import (
     _apply_row_context_boost,
     _canonicalize_candidates,
-    detect,
-    detect_file,
 )
-
 
 # === Proposal A : HGNC canonical ranking =====================================
 
@@ -77,7 +72,7 @@ class _FakeXrefIndex:
         return self._map.get(identifier.strip())
 
 
-def _build_fake_report(suspicion_kwargs: dict) -> "object":
+def _build_fake_report(suspicion_kwargs: dict) -> object:
     """Wrap one Suspicion in a Report-shaped namespace for the boost function."""
     from uncorrupt.detector import Report, Suspicion
     rep = Report(rows_scanned=0, columns_scanned=0)

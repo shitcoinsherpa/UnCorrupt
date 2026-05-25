@@ -1,54 +1,69 @@
 # Contributing to UnCorrupt
 
-Thanks for considering a contribution. This project aims to be the most rigorous Excel-corruption detector in genomics — every change needs to defend that bar.
+Thanks for considering a contribution. The fastest way to land a change is to attach the file that motivated it.
 
-## Where to start
+## The single most useful thing you can do
 
-- **Issues with a real reproduction case** are the most welcome. If you can ship a tiny xlsx fixture that the current detector fails on, we can almost always turn it into a test + fix.
-- Code style: ruff defaults (line-length 100), mypy strict, pytest. Run `ruff check`, `mypy src`, `pytest -q` before opening a PR.
-- The detector adheres to Ziemann's "Five Pillars of Computational Reproducibility" (Briefings in Bioinformatics 2023). Proposals that compromise reproducibility, validation rigor, or audit trail honesty will not land — see [`docs/methods.md`](docs/methods.md) for the project's working stance.
+If you found a corruption pattern UnCorrupt missed, or a false positive on a real file, **attach the file** (or the smallest redacted version that still reproduces it) on a bug report. Almost every fix in this codebase started as a one-cell fixture committed alongside a regression test. No file, no test, no fix.
 
-## Development workflow
+## Set up a dev environment
 
 ```bash
-git clone <fork-url> uncorrupt && cd uncorrupt
+git clone https://github.com/<your-fork>/UnCorrupt.git
+cd UnCorrupt
 
-# Install pinned deps locally (same exact versions as the production container)
-python -m venv .venv && source .venv/bin/activate
-pip install --upgrade pip==24.3.1
-pip install --require-hashes -r requirements.txt
-pip install -e .
+python -m venv .venv
+source .venv/bin/activate    # Windows: .venv\Scripts\activate
 
-# Run the test suite (must pass before you push)
+pip install -e ".[dev]"
+
+# Sanity check
 pytest -q
+ruff check src tests
+mypy src
+```
 
-# Or run inside the production container exactly as CI does
+That installs the package in editable mode plus pytest, ruff, mypy, hypothesis, build, and pytest-cov.
+
+To run the UI locally while you work:
+
+```bash
+uncorrupt-app
+```
+
+To run the container build the way CI does:
+
+```bash
 docker build -t uncorrupt:dev .
-docker run --rm uncorrupt:dev
+docker run --rm uncorrupt:dev python -c "from uncorrupt.detector import detect_file; print('ok')"
 ```
 
 ## Pull-request checklist
 
-- [ ] The full test suite (`pytest -q`) passes locally, in the Docker container, and in CI
-- [ ] New behavior is covered by a unit test (or by a fixture in `tests/fixtures/`)
-- [ ] If you fixed a detector miss, add a regression test pinned to the exact `(pmc_id, file, sheet, column, row, value)` case — see existing tests in `tests/test_detector.py` for shape
-- [ ] If you changed the detector decision rules, update `docs/methods.md` with the rationale and the recall/precision delta against Ziemann S2
-- [ ] If you bumped a dependency, regenerate `requirements.txt` via `pip-compile --generate-hashes --output-file=requirements.txt requirements.lock`
-- [ ] `CHANGELOG.md` has an entry under `[Unreleased]`
-- [ ] No commits add `# noqa` or `# type: ignore` without an inline comment explaining why
-- [ ] No commit relaxes a test assertion or removes a failing test without escalating to the maintainers first
+- [ ] `pytest -q` passes locally
+- [ ] `ruff check src tests` is clean
+- [ ] `mypy src` is clean
+- [ ] New behaviour has a unit test, or a fixture in `tests/fixtures/`
+- [ ] A missed detection has a regression test pinned to the exact corruption pattern
+- [ ] If you changed detector decision rules, `docs/methods.md` shows the recall and precision delta on the published validation corpora
+- [ ] `CHANGELOG.md` has a bullet under `[Unreleased]`
+- [ ] No new `# noqa` or `# type: ignore` without an inline reason
 
 ## What we will not accept
 
-- "Improvements" that silently rewrite data. The detector emits **flags** with confidence scores; the human reviewer or downstream code does the rewrite. We never auto-correct.
-- New detection rules without ground-truth validation. Every rule needs to point to a Ziemann S2 entry (or equivalently documented corruption) it newly catches AND a negative-control sample showing it doesn't false-positive.
-- Removing the column classifier or placeholder filtering to "catch more". Those layers cost real precision; relaxing them needs a thorough false-positive count before/after.
-- Skipping the Docker container build. The published numbers are reproducible only because the environment is bit-for-bit pinned — patches that say "works on my machine" need to also say "works in the container."
+- **Silent data rewrites.** The detector emits flags with confidence scores. The reviewer or the downstream tool commits the change. We never auto-overwrite a cell.
+- **New detection rules without evidence.** Every new rule needs a real-world positive example it catches AND a real-world negative example showing it does not false-positive. Synthetic-only test fixtures are not enough.
+- **Loosening the column classifier or the placeholder filter to "catch more."** Those layers cost real precision on the published validation walks. Relaxing them needs a full false-positive count, before and after, on the Ziemann S2 and the EPMC-expanded corpus.
+- **Skipping the container build.** The published accuracy numbers are reproducible because the container is pinned. Patches that say "works on my machine" need to also say "works in the container."
 
 ## Reporting security issues
 
-Do not file security issues in the public tracker. Open a GitHub security advisory on the repository (private to maintainers). We'll triage within 48 h.
+Do not file security problems in the public issue tracker. Open a private GitHub Security Advisory at https://github.com/shitcoinsherpa/UnCorrupt/security/advisories/new. We respond within 72 hours. Full policy is in [`SECURITY.md`](SECURITY.md).
+
+## Code of conduct
+
+By participating you agree to abide by [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) (Contributor Covenant 2.1).
 
 ## Citation
 
-If your change ends up in a release, you'll appear in the contributors list of the corresponding `CITATION.cff` entry. Real names + ORCID welcomed.
+If your change ships in a release, you appear in the contributors list of the corresponding `CITATION.cff` entry. Real names plus ORCID welcomed.

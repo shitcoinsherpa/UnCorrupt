@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from uncorrupt.app import (
@@ -11,7 +12,6 @@ from uncorrupt.app import (
     _sniff_extension_override,
 )
 from uncorrupt.column_classifier import classify_column
-import pandas as pd
 
 
 def test_sniff_detects_html_placeholder(tmp_path: Path) -> None:

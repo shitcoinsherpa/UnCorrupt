@@ -14,7 +14,8 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from datetime import date, datetime, time as _time, timedelta
+from datetime import date, datetime, timedelta
+from datetime import time as _time
 from functools import cache as _cache
 from typing import Any
 
@@ -36,6 +37,7 @@ def _serial_to_date(n: int) -> date | None:
     except (OverflowError, ValueError):
         return None
 
+from .homoglyph import looks_like_gene_after_repair as _homoglyph_repair
 from .registries import (
     GENE_LIKE_PATTERN,
     HGNC_NEW_SYMBOLS,
@@ -44,7 +46,6 @@ from .registries import (
     NON_IDENTIFIER_HEADER_HINTS,
     RIKEN_PATTERN,
 )
-from .homoglyph import looks_like_gene_after_repair as _homoglyph_repair
 
 
 @dataclass
@@ -156,7 +157,6 @@ _MONTH_ABBR = {
     "aoa": 8,    # French August (août, ASCII fallback)
     "fev": 2,    # French/Portuguese February (février/fevereiro)
     "fév": 2,    # French February with accent
-    "dec": 12,   # English December (already above, kept for symmetry)
     "déc": 12,   # French December (décembre)
     "jui": 6,    # French June (juin) : ambiguous with July; June chosen
     # === German ===
@@ -230,9 +230,9 @@ def _multispecies_symbols_lower() -> frozenset[str]:
     Empty set when the multi-species xref tables haven't been fetched
     yet (run `scripts/refresh_multispecies_xref.py`).
     """
-    from pathlib import Path as _Path
+    from .corpus import DATA_RAW
     syms: set[str] = set()
-    reg_dir = _Path(__file__).resolve().parents[2] / "data/raw/registries"
+    reg_dir = DATA_RAW / "registries"
 
     # English-month-abbrev date shapes are EXACTLY the Excel-corruption
     # output. We want those to parse as dates, not be suppressed by the
@@ -330,8 +330,8 @@ def _parse_date_string(s: str) -> list[date]:
             and not contains_payload_char
         ):
             try:
-                from dateutil.parser import parse as _du_parse
                 from dateutil.parser import ParserError as _DUParserError
+                from dateutil.parser import parse as _du_parse
                 out: list[date] = []
                 for dayfirst in (False, True):
                     try:
@@ -617,8 +617,7 @@ def _candidates_for_month_and_n(month: int, n: int) -> list[str]:
         # = May 31. JUN1, JUN2, JUN3 are real human proto-oncogene members
         # of the AP-1 transcription factor complex.
         if n >= 29:
-            jun_day = 31 - (31 - n)  # n=31 -> JUN1, n=30 -> JUN2, n=29 -> JUN3
-            jun_idx = 32 - n         # n=31 -> JUN1, n=30 -> JUN2, n=29 -> JUN3
+            jun_idx = 32 - n  # n=31 -> JUN1, n=30 -> JUN2, n=29 -> JUN3
             if 1 <= jun_idx <= 3:
                 out.append(f"JUN{jun_idx}")
     elif month == 1 and 30 <= n <= 50:
@@ -728,7 +727,7 @@ def _reverse_gene_date(d: date, number_format: str | None = None) -> list[str]:
 _FLOAT64_EXACT_MAX = 2**53  # 9_007_199_254_740_992 : Excel int precision limit
 
 
-def _column_leading_zero_widths(series: "pd.Series") -> dict[int, int]:
+def _column_leading_zero_widths(series: pd.Series) -> dict[int, int]:
     """For an identifier-shaped column, return `{width: count}` of cells that
     are leading-zero strings (e.g. `'00123'` has width 5)."""
     import re as _re
@@ -747,7 +746,7 @@ _IDENTIFIER_LIKE_COLUMN_TYPES = frozenset({
 })
 
 
-def _column_is_any_identifier(col_name: str, series: "pd.Series") -> bool:
+def _column_is_any_identifier(col_name: str, series: pd.Series) -> bool:
     """True if the column classifies as ANY identifier shape (gene symbols,
     Entrez, UniProt, RefSeq, Ensembl, HGNC, RIKEN) OR the header tokens
     explicitly contain identifier hints. Wider than `_column_is_identifier`
@@ -764,8 +763,8 @@ def _column_is_any_identifier(col_name: str, series: "pd.Series") -> bool:
 
 
 def _detect_numeric_id_corruptions(
-    df: "pd.DataFrame",
-    report: "Report",
+    df: pd.DataFrame,
+    report: Report,
     identifier_cols: set[str],
     flagged: set[tuple[str, int]],
     sheet: str | None,
@@ -824,6 +823,14 @@ def _detect_numeric_id_corruptions(
                 is_id = True
         if not is_id:
             continue
+        # Surface header-promoted identifier columns in the report summary
+        # too. Without this, a RIKEN/Ensembl column where every cell got
+        # coerced to float passes the long-int check but the report header
+        # still says "Identifier columns: 0", which is confusing.
+        if col_s not in identifier_cols:
+            identifier_cols.add(col_s)
+            if col_s not in report.identifier_columns:
+                report.identifier_columns.append(col_s)
         typical_width: int | None = None
         if n_lz >= 3:
             typical_width = max(widths, key=lambda w: widths[w])
@@ -1090,9 +1097,7 @@ def detect(df: pd.DataFrame, sheet: str | None = None) -> Report:
                         _months.add(_d.month)
         if _n_strings >= 5:
             _frac = _n_dates / _n_strings
-            if _header_says_date and _frac >= 0.5:
-                legitimate_date_columns.add(str(_col))
-            elif len(_months) >= 5 and _frac >= 0.8:
+            if _header_says_date and _frac >= 0.5 or len(_months) >= 5 and _frac >= 0.8:
                 legitimate_date_columns.add(str(_col))
 
     # Quantitative-measurement-column pre-pass.
@@ -1597,7 +1602,7 @@ def detect(df: pd.DataFrame, sheet: str | None = None) -> Report:
                             column=col_s, row=int(idx), value=value, kind="gene-date-string",
                             suggestion=" | ".join(unique_candidates),
                             confidence=confidence,
-                            reason=f"date-formatted string parses as uncorrupt candidate(s)",
+                            reason="date-formatted string parses as uncorrupt candidate(s)",
                             sheet=sheet,
                         ))
                         continue
@@ -1751,9 +1756,7 @@ def _detect_out_of_family_symbols(
         for idx, v in gene_like_cells:
             if (v in HGNC_NEW_SYMBOLS
                     or v in HGNC_RENAME_MAP
-                    or v in _HGNC_RENAME):
-                recognised += 1
-            elif _hgnc_local is not None and _hgnc_local.resolve(v) is not None:
+                    or v in _HGNC_RENAME) or _hgnc_local is not None and _hgnc_local.resolve(v) is not None:
                 recognised += 1
             else:
                 unrecognised.append((idx, v))
@@ -2021,7 +2024,7 @@ def _row_xref_index():
 
 def _apply_row_context_boost(
     report: Report,
-    sheets_by_name: "dict[str, pd.DataFrame]",
+    sheets_by_name: dict[str, pd.DataFrame],
     xref,
 ) -> int:
     """Boost confidence on any suspicion whose row contains an external ID

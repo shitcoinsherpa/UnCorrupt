@@ -11,12 +11,16 @@ abstract: >-
   dates (SEPT7 -> Sep-07), RIKEN/accession IDs coerced to floats
   (2310009E13 -> 2.31E+19), leading zeros stripped, and the rest of
   the Excel pathology documented by Ziemann et al. (2016, 2021). The
-  detector reaches 98.62 % cell-level recall against Ziemann's 2021
-  PMC corpus with zero false positives on manually-reviewed hard
-  cases, and emits a Frictionless Table Schema sidecar that prevents
-  future corruption on import. Validated at 22x Koh-2022's sample
-  scale across 7,945 supplementary files spanning 11 high-impact
-  genetics journals (2022-2026).
+  detector reaches 95.16 % cell-level recall (1591/1672 verifiable
+  cells) against an EPMC-expanded extension of Ziemann's 2021 S2
+  corpus (re-verified 2026-05-25), 100 % recall on the older Ziemann
+  2016 corpus (279/279 files), and 100 % post-boost precision at all
+  user-facing confidence levels (>= 0.50) against 2,180 xref-validated
+  positive cells. Replication scan covered 19,500 supplementary files
+  across 11 high-impact genetics journals (2022-2026); detector flagged
+  high-confidence corruption in 988 distinct papers. Emits a
+  Frictionless Table Schema sidecar that prevents future corruption
+  on import.
 authors:
   - alias: "LLMSherpa"
     affiliation: "BT6 AI Red Team (bt6.gg)"
