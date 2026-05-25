@@ -34,13 +34,13 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
+# `packages` includes every file under the listed directories (Python
+# AND data files), so the bundled `_data/registries/` ships inside the
+# wheel automatically. Earlier revisions added force-include / shared-data
+# on top of this and produced duplicate ZIP entries that PyPI's upload
+# rejects ("400 Invalid distribution file. ZIP archive not accepted:
+# Duplicate filename in local headers"). Leave this as the single source.
 packages = ["src/uncorrupt"]
-# Ship registry data inside the package so pip installs work standalone.
-[tool.hatch.build.targets.wheel.shared-data]
-"src/uncorrupt/_data" = "uncorrupt/_data"
-
-[tool.hatch.build.targets.wheel.force-include]
-"src/uncorrupt/_data" = "uncorrupt/_data"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
