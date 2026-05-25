@@ -1,10 +1,10 @@
 # UnCorrupt
 
-[![CI](https://github.com/shitcoinsherpa/UnCorrupt/actions/workflows/ci.yml/badge.svg)](https://github.com/shitcoinsherpa/UnCorrupt/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/uncorrupt.svg)](https://pypi.org/project/uncorrupt/)
-[![Python](https://img.shields.io/pypi/pyversions/uncorrupt.svg)](https://pypi.org/project/uncorrupt/)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![HuggingFace Space](https://img.shields.io/badge/%F0%9F%A4%97%20Try%20it-Space-yellow.svg)](https://huggingface.co/spaces/Sherpa/uncorrupt)
+[![CI](https://github.com/shitcoinsherpa/UnCorrupt/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/shitcoinsherpa/UnCorrupt/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/uncorrupt?label=PyPI&color=blue)](https://pypi.org/project/uncorrupt/)
+[![Python](https://img.shields.io/pypi/pyversions/uncorrupt?label=Python)](https://pypi.org/project/uncorrupt/)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue)](LICENSE)
+[![HuggingFace Space](https://img.shields.io/badge/%F0%9F%A4%97_HuggingFace-Try_it-yellow)](https://huggingface.co/spaces/Sherpa/uncorrupt)
 
 **Excel keeps turning your gene names into dates. This unfucks them.**
 
