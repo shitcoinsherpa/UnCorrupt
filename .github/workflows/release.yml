@@ -49,7 +49,9 @@ jobs:
       - name: Get version
         id: version
         run: |
-          echo "version=$(python -c 'import tomllib;print(tomllib.load(open(\"pyproject.toml\",\"rb\"))[\"project\"][\"version\"])')" >> "$GITHUB_OUTPUT"
+          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: ${VERSION}"
 
       - name: Check distributions
         run: twine check dist/*
