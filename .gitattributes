@@ -1,0 +1,22 @@
+# Force LF line endings for code/text — prevents Windows-induced diff noise
+*.py        text eol=lf
+*.md        text eol=lf
+*.toml      text eol=lf
+*.lock      text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.json      text eol=lf
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+.gitignore  text eol=lf
+.dockerignore text eol=lf
+.gitattributes text eol=lf
+
+# Binary inputs (xlsx, xls, etc) — never normalize
+*.xlsx      binary
+*.xls       binary
+*.png       binary
+*.jpg       binary
+*.gguf      binary
+*.zip       binary
+*.pdf       binary

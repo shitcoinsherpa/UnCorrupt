@@ -1,0 +1,16 @@
+uncorrupt
+Copyright 2026 The uncorrupt authors.
+
+This product bundles the following third-party canonical reference data:
+
+- HGNC bulk gene-symbol registry (https://www.genenames.org/), snapshot
+  dated 2026-05-14. HGNC data is freely available under the EBI terms of use
+  (https://www.ebi.ac.uk/about/terms-of-use).
+
+- Ziemann 2021 PLOS Comp. Bio. supplementary tables S1 and S2 (PMC7775223,
+  https://doi.org/10.1371/journal.pcbi.1008984). Published under
+  CC-BY-4.0 by the original authors.
+
+This product references but does not bundle the Koh 2022 Scientific Reports
+replication corpus, fetched from Europe PMC supplementary endpoints under
+the publishers' open-access terms.

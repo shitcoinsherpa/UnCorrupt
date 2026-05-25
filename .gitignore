@@ -1,0 +1,88 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.env
+env/google-service-account.json
+data/raw/*
+!data/raw/.gitkeep
+!data/raw/CORPUS_MANIFEST.json
+# Canonical reference data — small, stable, required by the test suite
+!data/raw/registries/
+!data/raw/registries/**
+!data/raw/ziemann_2021_corpus/
+data/raw/ziemann_2021_corpus/*
+!data/raw/ziemann_2021_corpus/S1_ensembl_*.xlsx
+!data/raw/ziemann_2021_corpus/S2_articles_*.xlsx
+!data/raw/ziemann_2021_corpus/MANUAL_FETCH_MANIFEST.tsv
+data/derived/*
+!data/derived/.gitkeep
+results/*
+!results/.gitkeep
+.DS_Store
+.playwright-mcp/
+*.log
+nohup.out
+# Personal-environment tooling — not part of the public artifact
+.aiwg/
+.claude/
+AIWG.md
+CLAUDE.md
+
+# Dev scratch / scratch-pad files — never commit
+scratch/
+scratch_*.py
+debug_*.py
+tmp_*.py
+*_scratch.py
+*_debug.py
+*.bak
+*.tmp
+*~
+*.swp
+*.swo
+.vscode/
+.idea/
+*.iml
+
+# OS junk
+Thumbs.db
+desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+
+# Docker scratch
+.docker-build-cache/
+
+# Python build / dist
+*.egg
+*.whl
+pip-wheel-metadata/
+!data/raw/ziemann_2016_corpus/
+data/raw/ziemann_2016_corpus/*
+!data/raw/ziemann_2016_corpus/Additional_file_1.xlsx
+!data/raw/ziemann_2016_corpus/fetch_ledger.jsonl
+!data/raw/riken_validation/
+data/raw/riken_validation/*
+
+# Mutation-testing work directory (cosmic-ray / mutmut copy the tree)
+mutants/
+.mutmut-cache/
+
+# Multi-species xref raw downloads — large (>120 MB combined),
+# refetchable via `scripts/refresh_multispecies_xref.py`. The PARSED
+# `.xref.tsv` files ARE committed (they're the canonical artifact).
+data/raw/registries/MGI_EntrezGene.rpt
+data/raw/registries/MRK_ENSEMBL.rpt
+data/raw/registries/BGI_FB.json.gz
+data/raw/registries/BGI_WB.json.gz
+data/raw/registries/zfin_aliases.txt
+data/raw/registries/zfin_ensembl_1_to_1.txt
+data/raw/registries/zfin_gene.txt

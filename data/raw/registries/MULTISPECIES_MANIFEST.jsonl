@@ -1,0 +1,5 @@
+{"species": "mgi", "name": "MGI (Mus musculus)", "rows": 1104267, "downloaded_at": "2026-05-20T11:33:53.272803+00:00", "license": "CC-BY 4.0"}
+{"species": "zfin", "name": "ZFIN (Danio rerio)", "rows": 127977, "downloaded_at": "2026-05-20T11:34:01.671426+00:00", "license": "CC-BY 4.0"}
+{"species": "flybase", "name": "FlyBase (Drosophila melanogaster)", "rows": 182585, "downloaded_at": "2026-05-20T11:34:04.823973+00:00", "license": "CC-BY 4.0"}
+{"species": "wormbase", "name": "WormBase (Caenorhabditis elegans)", "rows": 223817, "downloaded_at": "2026-05-20T11:34:09.850921+00:00", "license": "CC-BY 4.0"}
+{"species": "rat", "name": "NCBI Rattus norvegicus gene_info (rat)", "rows": 144530, "downloaded_at": "2026-05-20T15:44:21.698288+00:00", "license": "US public domain (NCBI)"}

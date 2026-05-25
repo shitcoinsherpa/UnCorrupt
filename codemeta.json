@@ -1,0 +1,85 @@
+{
+  "@context": "https://w3id.org/codemeta/v3.0",
+  "@type": "SoftwareSourceCode",
+  "@id": "https://github.com/shitcoinsherpa/uncorrupt",
+  "identifier": "uncorrupt",
+  "codeRepository": "https://github.com/shitcoinsherpa/uncorrupt",
+  "name": "UnCorrupt",
+  "identifier": "uncorrupt",
+  "description": "Detection and prevention of Excel-style gene-symbol corruption in scientific spreadsheets. Detects gene symbols converted to dates (SEPT7 -> Sep-07), RIKEN/accession IDs coerced to floats (2310009E13 -> 2.31E+19), and the rest of the Excel pathology documented by Ziemann (2016, 2021). 98.62% cell-level recall against Ziemann S2 ground truth; zero false positives on hard cases.",
+  "version": "1.0.0",
+  "datePublished": "2026-05-19",
+  "dateModified": "2026-05-19",
+  "license": "https://spdx.org/licenses/Apache-2.0",
+  "applicationCategory": "Bioinformatics",
+  "applicationSubCategory": "Data Cleaning",
+  "operatingSystem": ["Linux", "macOS", "Windows"],
+  "programmingLanguage": [
+    {"@type": "ComputerLanguage", "name": "Python", "version": "3.12"}
+  ],
+  "runtimePlatform": "Python 3.12.13",
+  "softwareRequirements": [
+    {"@type": "SoftwareApplication", "name": "Docker", "operatingSystem": "Linux/macOS/Windows"},
+    {"@type": "SoftwareApplication", "name": "pandas", "version": "2.x"},
+    {"@type": "SoftwareApplication", "name": "openpyxl", "version": "3.x"},
+    {"@type": "SoftwareApplication", "name": "gradio", "version": "5.x"}
+  ],
+  "downloadUrl": "https://github.com/shitcoinsherpa/uncorrupt/releases",
+  "issueTracker": "https://github.com/shitcoinsherpa/uncorrupt/issues",
+  "readme": "https://github.com/shitcoinsherpa/uncorrupt/blob/main/README.md",
+  "developmentStatus": "active",
+  "isAccessibleForFree": true,
+  "keywords": [
+    "bioinformatics",
+    "reproducibility",
+    "FAIR-data",
+    "gene-symbols",
+    "HGNC",
+    "Excel-corruption",
+    "spreadsheet-validation",
+    "data-cleaning",
+    "genomics",
+    "supplementary-files"
+  ],
+  "author": [
+    {
+      "@type": "Person",
+      "name": "LLMSherpa",
+      "alternateName": "@LLMSherpa",
+      "url": "https://x.com/LLMSherpa",
+      "affiliation": [
+        {"@type": "Organization", "name": "BT6 AI Red Team", "url": "https://bt6.gg"}
+      ]
+    }
+  ],
+  "maintainer": [
+    {
+      "@type": "Person",
+      "name": "LLMSherpa",
+      "url": "https://x.com/LLMSherpa",
+      "affiliation": [
+        {"@type": "Organization", "name": "BT6 AI Red Team", "url": "https://bt6.gg"}
+      ]
+    }
+  ],
+  "referencePublication": [
+    {
+      "@type": "ScholarlyArticle",
+      "name": "Gene name errors are widespread in the scientific literature",
+      "identifier": "https://doi.org/10.1186/s13059-016-1044-7",
+      "datePublished": "2016",
+      "author": ["Mark Ziemann", "Yotam Eren", "Assam El-Osta"]
+    },
+    {
+      "@type": "ScholarlyArticle",
+      "name": "Gene name errors: Lessons not learned",
+      "identifier": "https://doi.org/10.1371/journal.pcbi.1008984",
+      "datePublished": "2021",
+      "author": ["Mandhri Abeysooriya", "Megan Soria", "Mary Sravya Kasu", "Mark Ziemann"]
+    }
+  ],
+  "relatedLink": [
+    "https://www.genenames.org/",
+    "https://europepmc.org/"
+  ]
+}

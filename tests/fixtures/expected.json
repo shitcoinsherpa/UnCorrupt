@@ -1,0 +1,136 @@
+{
+  "fixture_01_day_of_month.xlsx": {
+    "description": "Classic d-mmm corruption: SEPT2 -> 2024-09-02, MARCH1 -> 2024-03-01",
+    "expected_suggestions": [
+      [
+        "SEPT2",
+        "SEP2"
+      ],
+      [
+        "MARCH1",
+        "MARC1"
+      ]
+    ],
+    "min_suspicions": 2
+  },
+  "fixture_02_year_suffix.xlsx": {
+    "description": "mmm-yy year-suffix corruption: SEPT7/SEPT15 stored as 2007-09-01/2015-09-01",
+    "expected_suggestions": [
+      [
+        "SEPT7",
+        "SEP7"
+      ],
+      [
+        "SEPT15",
+        "SEP15"
+      ]
+    ],
+    "min_suspicions": 2
+  },
+  "fixture_03_excel_serial.xlsx": {
+    "description": "Excel-serial integers in identifier column: 41897->2014-09-15->SEPT15, 39880->2009-03-08->MARCH8",
+    "expected_suggestions": [
+      [
+        "SEPT15",
+        "SEP15"
+      ],
+      [
+        "MARCH8"
+      ]
+    ],
+    "min_suspicions": 2
+  },
+  "fixture_04_iso_string.xlsx": {
+    "description": "ISO-datetime strings in gene-symbol column (iter-2 ISO-parser case)",
+    "expected_suggestions": [
+      [
+        "MARCH3"
+      ],
+      [
+        "SEPT4",
+        "SEP4"
+      ]
+    ],
+    "min_suspicions": 2
+  },
+  "fixture_05_multi_token.xlsx": {
+    "description": "Multi-token cells preserving author annotation alongside the corrupted date",
+    "expected_suggestions": [
+      [
+        "OCT4"
+      ],
+      [
+        "OCT2"
+      ]
+    ],
+    "min_suspicions": 2
+  },
+  "fixture_06_riken_float.xlsx": {
+    "description": "RIKEN ID coerced to scientific-notation float; flagged as id-float (precision lost)",
+    "expected_kind": "id-float",
+    "min_suspicions": 1
+  },
+  "fixture_07_clean.xlsx": {
+    "description": "Negative control \u2014 clean post-rename symbols. Should produce zero suspicions.",
+    "min_suspicions": 0,
+    "max_suspicions": 0
+  },
+  "fixture_08_measurement_negative_control.xlsx": {
+    "description": "Date-serial-shaped integers in a measurement column \u2014 must NOT flag (column classifier filters).",
+    "min_suspicions": 0,
+    "max_suspicions": 0
+  },
+  "fixture_09_xref_corroborated.xlsx": {
+    "description": "Gene-date corruption + Ensembl IDs in same row that resolve to the suggested gene -> confidence should be xref-boosted",
+    "expected_suggestions": [
+      [
+        "SEPTIN6"
+      ],
+      [
+        "SEPTIN2"
+      ],
+      [
+        "MARCHF1"
+      ]
+    ],
+    "min_suspicions": 3,
+    "min_xref_corroborated": 3,
+    "expected_xref_corroboration_keywords": [
+      "ENSG00000125354",
+      "ENSG00000168385",
+      "ENSG00000145416"
+    ]
+  },
+  "fixture_10_leading_zeros.xlsx": {
+    "description": "Leading-zero strip: column of '00xxxxxx' Affymetrix-style IDs with two cells corrupted to bare ints (12345, 23456)",
+    "min_suspicions": 2,
+    "expected_kind": "leading-zero-stripped",
+    "expected_suggestions": [
+      [
+        "00012345"
+      ],
+      [
+        "00023456"
+      ]
+    ]
+  },
+  "fixture_11_long_int_precision.xlsx": {
+    "description": "Long-int precision loss: column of accession strings with two cells holding integers > 2^53 (precision unrecoverable)",
+    "min_suspicions": 2,
+    "expected_kind": "long-int-precision-loss"
+  },
+  "fixture_12_multisheet.xlsx": {
+    "description": "Multi-sheet xlsx: clean metadata on sheet 1, gene-date corruptions on sheet 2. Tests detect_file's sheet aggregation.",
+    "min_suspicions": 2,
+    "expected_suggestions": [
+      [
+        "SEPTIN2",
+        "SEPT2"
+      ],
+      [
+        "MARCHF1",
+        "MARCH1"
+      ]
+    ]
+  }
+}

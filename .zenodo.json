@@ -1,0 +1,64 @@
+{
+  "title": "UnCorrupt: Detection and prevention of Excel-style gene-symbol corruption in scientific spreadsheets",
+  "description": "<p>Detects Excel auto-conversion damage in supplementary spreadsheets accompanying genomics papers: gene symbols converted to dates (SEPT7 -> Sep-07), RIKEN/accession IDs coerced to floats (2310009E13 -> 2.31E+19), leading zeros stripped, decimal-comma locale collisions, unicode homoglyph substitutions, time-coercion artifacts, and the rest of the Excel pathology documented by Ziemann et al. (2016, 2021) and Pyle (2017).</p><p>Validated end-to-end on three independent corpora:</p><ul><li><strong>Koh 2022</strong> (full 7,945 supplementary files): 100% post-boost precision at user-facing thresholds, Wilson 95% [0.998, 1.000] on 1,630 xref-labeled cells.</li><li><strong>Ziemann 2021 S2</strong> (canonical paper ground truth): 98.78% cell-level recall (646/654).</li><li><strong>Ziemann 2016</strong> (independent paper, 2005-2015 time period): 100% recall on 279 validatable files, Wilson 95% [0.9864, 1.000].</li></ul><p>Ships a Frictionless Table Schema sidecar (<code>uncorrupt schema</code>) that prevents future corruption: identifier columns pinned to <code>type=string</code> with regex constraints matching the inferred registry (HGNC, MGI, ZFIN, FlyBase, WormBase, rat). Any locale-aware re-import that coerces gene symbols to dates fails validation rather than silently corrupting.</p>",
+  "upload_type": "software",
+  "creators": [
+    {
+      "name": "LLMSherpa",
+      "affiliation": "BT6 AI Red Team (bt6.gg)"
+    }
+  ],
+  "license": "Apache-2.0",
+  "access_right": "open",
+  "keywords": [
+    "bioinformatics",
+    "reproducibility",
+    "data-cleaning",
+    "gene-symbols",
+    "HGNC",
+    "excel-corruption",
+    "spreadsheet-validation",
+    "FAIR-data",
+    "genomics",
+    "supplementary-files",
+    "frictionless-data",
+    "unicode-homoglyph"
+  ],
+  "communities": [
+    {"identifier": "fair-research"},
+    {"identifier": "bioinformatics-tools"}
+  ],
+  "related_identifiers": [
+    {
+      "relation": "cites",
+      "identifier": "10.1186/s13059-016-1044-7",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "relation": "cites",
+      "identifier": "10.1371/journal.pcbi.1008984",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "relation": "cites",
+      "identifier": "10.1093/bib/bbad375",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "relation": "cites",
+      "identifier": "10.1038/s41598-022-17104-3",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    }
+  ],
+  "references": [
+    "Ziemann M, Eren Y, El-Osta A (2016). Gene name errors are widespread in the scientific literature. Genome Biology 17(1):177. doi:10.1186/s13059-016-1044-7",
+    "Abeysooriya M, Soria M, Kasu MS, Ziemann M (2021). Gene name errors: Lessons not learned. PLOS Computational Biology 17(7):e1008984. doi:10.1371/journal.pcbi.1008984",
+    "Ziemann M, Poyet P, Lawson A (2023). The five pillars of computational reproducibility: bioinformatics and beyond. Briefings in Bioinformatics 24(6):bbad375. doi:10.1093/bib/bbad375",
+    "Koh JLY (2022). Gene Updater: a Web tool that autocorrects and updates for Excel misidentified gene names. Scientific Reports 12(1):14002. doi:10.1038/s41598-022-17104-3",
+    "Pyle JR (2017). Escape Excel: a tool for preventing gene symbol and accession conversion errors. PLOS ONE 12(9):e0185207. doi:10.1371/journal.pone.0185207"
+  ]
+}
