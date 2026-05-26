@@ -56,14 +56,6 @@ docker run --rm uncorrupt:dev python -c "from uncorrupt.detector import detect_f
 - **Loosening the column classifier or the placeholder filter to "catch more."** Those layers cost real precision on the published validation walks. Relaxing them needs a full false-positive count, before and after, on the Ziemann S2 and the EPMC-expanded corpus.
 - **Skipping the container build.** The published accuracy numbers are reproducible because the container is pinned. Patches that say "works on my machine" need to also say "works in the container."
 
-## Reporting security issues
-
-Do not file security problems in the public issue tracker. Open a private GitHub Security Advisory at https://github.com/shitcoinsherpa/UnCorrupt/security/advisories/new. We respond within 72 hours. Full policy is in [`SECURITY.md`](SECURITY.md).
-
-## Code of conduct
-
-By participating you agree to abide by [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) (Contributor Covenant 2.1).
-
 ## Citation
 
 If your change ships in a release, you appear in the contributors list of the corresponding `CITATION.cff` entry. Real names plus ORCID welcomed.
