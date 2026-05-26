@@ -7,6 +7,12 @@ on:
     branches: [main, master]
   workflow_dispatch: {}
 
+# actions/checkout@v6 requires explicit contents:read on the workflow
+# token. Older versions inherited the permissive default; v6 demands
+# an explicit grant or the clone fails with HTTP 403.
+permissions:
+  contents: read
+
 jobs:
   tests:
     name: pytest (Python ${{ matrix.python-version }})
