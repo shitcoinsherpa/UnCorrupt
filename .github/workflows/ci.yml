@@ -7,9 +7,11 @@ on:
     branches: [main, master]
   workflow_dispatch: {}
 
-# actions/checkout@v6 requires explicit contents:read on the workflow
-# token. Older versions inherited the permissive default; v6 demands
-# an explicit grant or the clone fails with HTTP 403.
+# Explicit read-only token scope. Required by recent checkout versions
+# and is the right default regardless. actions/checkout@v6 was tried
+# briefly (Dependabot bumped to it) but had an unresolved 403 regression
+# even with permissions: contents:read set; reverted to v5 which is
+# stable.
 permissions:
   contents: read
 
@@ -22,7 +24,7 @@ jobs:
       matrix:
         python-version: ["3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v5
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -74,7 +76,7 @@ jobs:
     name: Docker image builds
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v5
 
       - name: Build image
         run: docker build -t uncorrupt:ci .
