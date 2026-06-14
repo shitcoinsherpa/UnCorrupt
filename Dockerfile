@@ -22,7 +22,7 @@
 # inside the package via hatch's shared-data, so no large external corpus
 # is required for normal use.
 
-FROM python:3.12.13-slim-bookworm@sha256:d193c6f51a7dbd10395d6328de3a7edb0516fb0608ca138036576f574c3e07d2
+FROM python:3.14.0-slim-bookworm@sha256:d13fa0424035d290decef3d575cea23d1b7d5952cdf429df8f5542c71e961576
 
 LABEL org.opencontainers.image.title="UnCorrupt"
 LABEL org.opencontainers.image.description="Detection and repair of Excel-corrupted gene symbols in genomics spreadsheets."
